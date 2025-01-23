@@ -1,51 +1,40 @@
 import os
-import shutil
-import pandas as pd
 import numpy as np
+import pandas as pd
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
-class OASISPreprocessor:
-    def __init__(self, original_dataset_path, output_path):
+# Define paths
+raw_data_path = './data/raw'
+processed_data_path = './data/processed'
+metadata_path = './data/metadata/metadata.csv'
 
-        """ Initialize dataset preprocessing """
+# Create directories for processed data
+os.makedirs(processed_data_path, exist_ok=True)
 
-        self.original_path = original_dataset_path
-        self.output_path = output_path
-        
-    def create_classification_directories(self):
-        """ Create directories for Alzheimer's stages """
-        stages = ['non_demented', 'very_mild', 'mild', 'moderate']
-        for stage in stages:
-            os.makedirs(os.path.join(self.output_path, stage), exist_ok=True)
-    
-    def organize_images(self, metadata_csv):
-        """ Organize images into classification directories """
-        # Read metadata
-        metadata = pd.read_csv(metadata_csv)
-        
-        # Iterate through metadata
-        for _, row in metadata.iterrows():
-            image_path = row['image_path']
-            alzheimers_stage = row['clinical_dementia_rating']
-            
-            # Map CDR to stages
-            stage_mapping = {
-                0: 'non_demented', 
-                0.5: 'very_mild', 
-                1: 'mild', 
-                2: 'moderate'
-            }
-            
-            stage_folder = stage_mapping.get(alzheimers_stage, 'non_demented')
-            
-            # Copy image to appropriate directory
-            destination = os.path.join(self.output_path, stage_folder)
-            shutil.copy(image_path, destination)
-    
-    def validate_dataset(self):
-        """
-        Validate preprocessed dataset
-        """
-        stages = ['non_demented', 'very_mild', 'mild', 'moderate']
-        for stage in stages:
-            stage_path = os.path.join(self.output_path, stage)
-            print(f"{stage}: {len(os.listdir(stage_path))} images")
+# Load metadata
+metadata = pd.read_csv(metadata_path)
+
+# Data augmentation and preprocessing
+datagen = ImageDataGenerator(rescale=1./255, validation_split=0.2)
+
+train_generator = datagen.flow_from_dataframe(
+    metadata,
+    directory=raw_data_path,
+    x_col='image_path',
+    y_col='label',
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    subset='training'
+)
+
+validation_generator = datagen.flow_from_dataframe(
+    metadata,
+    directory=raw_data_path,
+    x_col='image_path',
+    y_col='label',
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    subset='validation'
+)

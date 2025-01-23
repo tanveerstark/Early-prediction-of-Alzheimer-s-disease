@@ -22,8 +22,11 @@ the flow of the Alzheimer's disease prediction project using ResNet-50 with the 
 4. Model Evaluation:
                       ->Evaluate the model's performance on the validation set using various metrics.
                       ->Below are some evaluation metrics and visualizations:
+   
                                             ->Confusion Matrix
+   
                                             ->Classification Report
+   
                                             ->ROC Curve and AUC
     
 

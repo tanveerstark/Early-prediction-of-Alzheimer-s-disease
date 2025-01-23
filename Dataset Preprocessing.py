@@ -6,7 +6,7 @@ import numpy as np
 class OASISPreprocessor:
     def __init__(self, original_dataset_path, output_path):
 
-        """ Initialize OASIS dataset preprocessing """
+        """ Initialize dataset preprocessing """
 
         self.original_path = original_dataset_path
         self.output_path = output_path
